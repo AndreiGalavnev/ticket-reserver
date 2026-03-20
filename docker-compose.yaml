@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15.17-alpine
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./airflow_db_data:/var/lib/postgresql/data
+  airflow-webserver:
+    build: .  # <--- ИЗМЕНЕНО: собираем из Dockerfile
+    shm_size: '2gb' # <--- ДОБАВЛЕНО: важно для стабильной работы Chromium
+    command: webserver
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__FERNET_KEY=fvbIYeQi9hk6XyTbRhVFCeU9-6IXfwqHPUzHidGGYPM=
+      - _PIP_ADDITIONAL_DEPENDENCIES=apache-airflow-providers-docker apache-airflow-providers-postgres psycopg2-binary python-dotenv
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8090:8080"
+    user: "50000:0" # Стандартный юзер airflow
+
+  airflow-scheduler:
+    build: . # <--- ИЗМЕНЕНО: собираем из Dockerfile
+    shm_size: '2gb' # <--- ДОБАВЛЕНО
+    command: scheduler
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__FERNET_KEY=fvbIYeQi9hk6XyTbRhVFCeU9-6IXfwqHPUzHidGGYPM=
+      - _PIP_ADDITIONAL_DEPENDENCIES=apache-airflow-providers-docker apache-airflow-providers-postgres psycopg2-binary python-dotenv
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    user: "50000:0"
