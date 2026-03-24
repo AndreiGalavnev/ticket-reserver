@@ -23,7 +23,7 @@ services:
     environment:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__CORE__FERNET_KEY=fvbIYeQi9hk6XyTbRhVFCeU9-6IXfwqHPUzHidGGYPM=
+      - AIRFLOW__CORE__FERNET_KEY=${AIRFLOW__CORE__FERNET_KEY}
       - _PIP_ADDITIONAL_DEPENDENCIES=apache-airflow-providers-docker apache-airflow-providers-postgres psycopg2-binary python-dotenv
     volumes:
       - ./airflow/dags:/opt/airflow/dags
@@ -43,7 +43,7 @@ services:
     environment:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__CORE__FERNET_KEY=fvbIYeQi9hk6XyTbRhVFCeU9-6IXfwqHPUzHidGGYPM=
+      - AIRFLOW__CORE__FERNET_KEY=${AIRFLOW__CORE__FERNET_KEY}
       - _PIP_ADDITIONAL_DEPENDENCIES=apache-airflow-providers-docker apache-airflow-providers-postgres psycopg2-binary python-dotenv
     volumes:
       - ./airflow/dags:/opt/airflow/dags
